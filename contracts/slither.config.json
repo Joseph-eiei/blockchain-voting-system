@@ -1,0 +1,13 @@
+{
+  "exclude_paths": ["node_modules/"],
+  "exclude_detectors": [
+    "incorrect-exponentiation",
+    "divide-before-multiply",
+    "block-timestamp",
+    "assembly-usage",
+    "different-pragma-directives-are-used",
+    "too-many-digits",
+    "costly-operations-inside-a-loop",
+    "external-calls-inside-loop"
+  ]
+}
