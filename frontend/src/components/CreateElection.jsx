@@ -10,13 +10,13 @@ export default function CreateElection({ onCreated }) {
   const [description, setDescription] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [candidates, setCandidates] = useState([{ name: "", metadataURI: "" }]);
+  const [candidates, setCandidates] = useState([{ name: "", description: "" }]);
   const [rawWhitelist, setRawWhitelist] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const addCandidate = () =>
-    setCandidates((c) => [...c, { name: "", metadataURI: "" }]);
+    setCandidates((c) => [...c, { name: "", description: "" }]);
   const updateCandidate = (i, field, val) =>
     setCandidates((c) =>
       c.map((cand, idx) => (idx === i ? { ...cand, [field]: val } : cand))
@@ -70,8 +70,7 @@ export default function CreateElection({ onCreated }) {
       for (const cand of candidates) {
         const txM = await contracts.cm.addCandidate(
           cand.name,
-          "",
-          cand.metadataURI
+          cand.description
         );
         const rcptM = await txM.wait();
         const parsedM = rcptM.logs
@@ -96,7 +95,7 @@ export default function CreateElection({ onCreated }) {
       setDescription("");
       setStartTime("");
       setEndTime("");
-      setCandidates([{ name: "", metadataURI: "" }]);
+      setCandidates([{ name: "", description: "" }]);
       setRawWhitelist("");
       onCreated?.();
     } catch (err) {
@@ -163,11 +162,9 @@ export default function CreateElection({ onCreated }) {
             />
             &nbsp;
             <input
-              placeholder="IPFS Metadata URI"
-              value={c.metadataURI}
-              onChange={(e) =>
-                updateCandidate(i, "metadataURI", e.target.value)
-              }
+              placeholder="Description"
+              value={c.description}
+              onChange={(e) => updateCandidate(i, "description", e.target.value)}
               required
               disabled={loading}
             />

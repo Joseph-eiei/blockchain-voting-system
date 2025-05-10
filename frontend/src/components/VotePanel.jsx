@@ -5,6 +5,8 @@ import { EthersContext } from "../contexts/EthersContext";
 export default function VotePanel({ electionId, ballot, candidateManager }) {
   const { contracts, signer } = useContext(EthersContext);
 
+  // which candidate the user has selected
+  const [selectedId, setSelectedId] = useState(null);
   const [candidates, setCandidates] = useState([]);
   const [eligible, setEligible] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
@@ -22,7 +24,7 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
           rawIds.map(async (bn) => {
             const id = Number(bn);
             const c = await candidateManager.getCandidate(id);
-            return { id, name: c.name };
+            return { id, name: c.name, description: c.description };
           })
         );
         setCandidates(list);
@@ -69,8 +71,8 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
     (async () => {
       try {
         const me = await signer.getAddress();
-        const voted = await ballot.hasVoted(electionId, me);
-        setHasVoted(voted);
+        const balance = await contracts.vr.balanceOf(me, electionId);
+        setHasVoted(balance === 0n);
       } catch (e) {
         console.error(e);
       }
@@ -108,22 +110,58 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
     <div style={{ marginTop: 20, padding: 20, border: "1px solid #ddd" }}>
       <p>Your Voting Tokens: {tokenBalance.toString()}</p>
       <h3>Cast your vote</h3>
-      {hasVoted ? (
-        <p style={{ color: "green" }}>You’ve already voted.</p>
-      ) : (
-        candidates.map((c) => (
-          <div key={c.id} style={{ margin: "8px 0" }}>
-            <strong>{c.name}</strong>
-            <button
-              onClick={() => handleVote(c.id)}
-              disabled={loading}
-              style={{ marginLeft: 12 }}
-            >
-              {loading ? "Submitting…" : "Vote"}
-            </button>
-          </div>
-        ))
-      )}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '1rem',
+        }}
+      >
+        {candidates.map((c) => (
+          <label
+            key={c.id}
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              border: '1px solid #ccc',
+              borderRadius: 8,
+              padding: '0.75rem',
+              cursor: 'pointer',
+              background: selectedId === c.id ? '#e6f7ff' : '#fff',
+            }}
+          >
+            <input
+              type="radio"
+              name="candidate"
+              value={c.id}
+              checked={selectedId === c.id}
+              onChange={() => setSelectedId(c.id)}
+              style={{ marginRight: 8, marginTop: 2 }}
+            />
+            <div>
+              <div style={{ fontWeight: 'bold', marginBottom: 4 }}>{c.name}</div>
+              <div style={{ fontSize: '0.9rem', color: '#555' }}>
+                {c.description}
+              </div>
+            </div>
+          </label>
+        ))}
+      </div>
+      <button
+        onClick={() => handleVote(selectedId)}
+        disabled={!selectedId || loading}
+        style={{
+          marginTop: '1rem',
+          padding: '0.5rem 1rem',
+          border: 'none',
+          borderRadius: 4,
+          background: '#1890ff',
+          color: '#fff',
+          cursor: selectedId && !loading ? 'pointer' : 'not-allowed',
+        }}
+      >
+        {loading ? 'Submitting…' : 'Vote'}
+      </button>
     </div>
   );
 }

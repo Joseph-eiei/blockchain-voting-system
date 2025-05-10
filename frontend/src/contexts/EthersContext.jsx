@@ -47,7 +47,7 @@ export function EthersProvider({ children }) {
     setSigner(s);
   }
 
-  // “Disconnect” simply clears out the signer & contracts
+  // Disconnect wallet
   function disconnectWallet() {
     setSigner(null);
   }
