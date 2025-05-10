@@ -11,7 +11,6 @@ contract Ballot is Ownable {
     CandidateManager public immutable cm;
     VoterRegistry    public immutable vr;
 
-    mapping(uint256 => mapping(address => bool)) public hasVoted;
     mapping(uint256 => mapping(uint256 => uint256)) private _votes;
 
     event VotersAdded(uint256 indexed electionId, address[] voters);
@@ -46,12 +45,11 @@ contract Ballot is Ownable {
             }
         }
         require(valid, "Candidate not in election");
-        require(!hasVoted[electionId][msg.sender], "Already voted");
+        require(vr.balanceOf(msg.sender, electionId) > 0, "Already voted or no token");
 
         vr.useVotingToken(electionId, msg.sender);
 
         _votes[electionId][candidateId] += 1;
-        hasVoted[electionId][msg.sender] = true;
         emit VoteCasted(electionId, candidateId, msg.sender);
     }
 
