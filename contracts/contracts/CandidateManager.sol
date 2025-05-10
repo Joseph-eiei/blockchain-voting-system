@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CandidateManager is ERC721URIStorage, Ownable {
+contract CandidateManager is Ownable {
 
     uint256 private _candidateIds;
 
@@ -12,20 +11,18 @@ contract CandidateManager is ERC721URIStorage, Ownable {
         uint256 id;
         string name;
         string description;
-        string metadataURI; // Metadata stored on IPFS
         bool exists;
     }
 
     mapping(uint256 => Candidate) public candidates;
 
-    event CandidateAdded(uint256 indexed id, string candidateName, string metadataURI);
+    event CandidateAdded(uint256 indexed id, string candidateName, string description);
 
-    constructor() ERC721("CandidateNFT", "CNFT") Ownable(msg.sender) {}
+    constructor() Ownable(msg.sender) {}
 
     function addCandidate(
         string memory candidateName,
-        string memory description,
-        string memory metadataURI
+        string memory description
     ) external onlyOwner returns (uint256) {
         _candidateIds++;
 
@@ -35,15 +32,10 @@ contract CandidateManager is ERC721URIStorage, Ownable {
             id: newCandidateId,
             name: candidateName,
             description: description,
-            metadataURI: metadataURI,
             exists: true
         });
 
-        _mint(msg.sender, newCandidateId);
-        _setTokenURI(newCandidateId, metadataURI);
-
-        emit CandidateAdded(newCandidateId, candidateName, metadataURI);
-
+        emit CandidateAdded(newCandidateId, candidateName, description);
         return newCandidateId;
     }
 
@@ -56,4 +48,3 @@ contract CandidateManager is ERC721URIStorage, Ownable {
         return candidates[candidateId].exists;
     }
 }
-
