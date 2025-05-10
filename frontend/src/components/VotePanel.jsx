@@ -6,10 +6,11 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
   const { contracts, signer } = useContext(EthersContext);
 
   const [candidates, setCandidates] = useState([]);
-  const [eligible, setEligible]     = useState(false);
-  const [hasVoted, setHasVoted]     = useState(false);
-  const [loading, setLoading]       = useState(false);
-  const [error, setError]           = useState("");
+  const [eligible, setEligible] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [tokenBalance, setTokenBalance] = useState(0n);
 
   // 1️⃣ Load candidate list
   useEffect(() => {
@@ -20,7 +21,7 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
         const list = await Promise.all(
           rawIds.map(async (bn) => {
             const id = Number(bn);
-            const c  = await candidateManager.getCandidate(id);
+            const c = await candidateManager.getCandidate(id);
             return { id, name: c.name };
           })
         );
@@ -32,15 +33,15 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
     })();
   }, [contracts.em, candidateManager, electionId]);
 
-  // 2️⃣ Check on-chain whitelist + registration
+  // 2️⃣ Check whitelist eligibility and token availability
   useEffect(() => {
     if (!ballot || !contracts.vr || !signer) return;
     (async () => {
       try {
-        const me     = await signer.getAddress();
-        const okWL   = await ballot.eligible(electionId, me);
-        const okReg  = await contracts.vr.isRegistered(me);
-        setEligible(okWL && okReg);
+        const me = await signer.getAddress();
+        // Adjust eligibility check to check token balance instead of whitelist
+        const bal = await contracts.vr.balanceOf(me, electionId);
+        setEligible(bal > 0n);
       } catch (e) {
         console.error(e);
         setError("Eligibility check failed");
@@ -48,12 +49,26 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
     })();
   }, [ballot, contracts.vr, signer, electionId]);
 
-  // 3️⃣ See if they’ve already voted
+  // 3️⃣ Load voting token balance
+  useEffect(() => {
+    if (!contracts.vr || !signer) return;
+    (async () => {
+      try {
+        const me = await signer.getAddress();
+        const bal = await contracts.vr.balanceOf(me, electionId);
+        setTokenBalance(bal);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, [contracts.vr, signer, hasVoted]);
+
+  // 4️⃣ Check if already voted
   useEffect(() => {
     if (!ballot || !signer) return;
     (async () => {
       try {
-        const me    = await signer.getAddress();
+        const me = await signer.getAddress();
         const voted = await ballot.hasVoted(electionId, me);
         setHasVoted(voted);
       } catch (e) {
@@ -62,7 +77,7 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
     })();
   }, [ballot, signer, electionId]);
 
-  // 4️⃣ Cast vote handler
+  // 5️⃣ Cast vote handler
   const handleVote = async (candidateId) => {
     setError("");
     setLoading(true);
@@ -70,7 +85,6 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
       const tx = await ballot.connect(signer).vote(electionId, candidateId);
       await tx.wait();
       setHasVoted(true);
-      alert("✅ Vote recorded!");
     } catch (err) {
       console.error(err);
       setError(err.reason || err.message || "Vote failed");
@@ -79,9 +93,12 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
     }
   };
 
-  // 5️⃣ Render
+  // 6️⃣ Render UI
   if (error) {
     return <p style={{ color: "red" }}>Error: {error}</p>;
+  }
+  if (hasVoted) {
+    return <p style={{ color: "green" }}>You’ve already voted.</p>;
   }
   if (!eligible) {
     return <p style={{ color: "crimson" }}>You are not eligible to vote in this election.</p>;
@@ -89,6 +106,7 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
 
   return (
     <div style={{ marginTop: 20, padding: 20, border: "1px solid #ddd" }}>
+      <p>Your Voting Tokens: {tokenBalance.toString()}</p>
       <h3>Cast your vote</h3>
       {hasVoted ? (
         <p style={{ color: "green" }}>You’ve already voted.</p>

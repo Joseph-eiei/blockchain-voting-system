@@ -60,7 +60,7 @@ export default function ElectionList({
             </span>
 
             {/* ─── Inline VotePanel ───────────────────────────── */}
-            {isSel && isActive && whitelist.includes(account) && ballot && (
+            {isSel && isActive && ballot && (
               <div style={{ marginTop: "1rem" }}>
                 <VotePanel
                   electionId={e.id}

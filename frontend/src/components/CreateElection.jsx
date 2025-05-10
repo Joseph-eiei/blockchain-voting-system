@@ -42,18 +42,6 @@ export default function CreateElection({ onCreated }) {
         .map((a) => a.trim().toLowerCase())
         .filter((a) => a !== "");
 
-      // only call registerVoters on addresses *not* yet in the registry
-      const toRegister = [];
-      for (const addr of whitelist) {
-        const already = await contracts.vr.isRegistered(addr);
-        if (!already) {
-          toRegister.push(addr);
-        }
-      }
-      if (toRegister.length > 0) {
-        const txRegVoters = await contracts.vr.registerVoters(toRegister);
-        await txRegVoters.wait();
-      }
 
       // 3) create election in EM (5-arg)
       const txE = await contracts.em.createElection(
@@ -100,7 +88,7 @@ export default function CreateElection({ onCreated }) {
         await contracts.em.registerCandidateInElection(electionId, candidateId);
       }
 
-      // 6) mirror whitelist into Ballot for vote gating
+      // 6) seed whitelist into Ballot for vote gating
       await contracts.ballot.addVoters(electionId, whitelist);
 
       // 7) reset form & notify parent

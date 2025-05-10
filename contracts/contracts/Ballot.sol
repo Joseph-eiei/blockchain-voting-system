@@ -12,7 +12,6 @@ contract Ballot is Ownable {
     VoterRegistry    public immutable vr;
 
     mapping(uint256 => mapping(address => bool)) public hasVoted;
-    mapping(uint256 => mapping(address => bool)) public eligible;
     mapping(uint256 => mapping(uint256 => uint256)) private _votes;
 
     event VotersAdded(uint256 indexed electionId, address[] voters);
@@ -26,20 +25,14 @@ contract Ballot is Ownable {
 
     /// @notice Seed the on‐chain whitelist
     function addVoters(uint256 electionId, address[] calldata voters) external onlyOwner {
-        // sanity check
-        ElectionManager.Election memory e = em.getElection(electionId);
-        require(bytes(e.name).length != 0, "Election does not exist");
-
-        for (uint i = 0; i < voters.length; i++) {
-            eligible[electionId][voters[i]] = true;
-        }
+        // mint one ERC‑1155 voting token per voter for this election
+        vr.registerVoters(electionId, voters);
         emit VotersAdded(electionId, voters);
     }
 
     /// @notice Cast a vote
     function vote(uint256 electionId, uint256 candidateId) external {
-        require(eligible[electionId][msg.sender], "Not whitelisted");
-        require(vr.isRegistered(msg.sender),      "Not registered voter");
+        require(vr.isEligible(electionId, msg.sender), "No voting token");
 
         ElectionManager.Election memory e = em.getElection(electionId);
         require(block.timestamp >= e.startTime && block.timestamp <= e.endTime, "Not active");
@@ -54,6 +47,8 @@ contract Ballot is Ownable {
         }
         require(valid, "Candidate not in election");
         require(!hasVoted[electionId][msg.sender], "Already voted");
+
+        vr.useVotingToken(electionId, msg.sender);
 
         _votes[electionId][candidateId] += 1;
         hasVoted[electionId][msg.sender] = true;

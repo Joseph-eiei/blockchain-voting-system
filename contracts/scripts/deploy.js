@@ -8,7 +8,7 @@ async function main() {
 
   // 1️⃣ VoterRegistry
   const VR = await hre.ethers.getContractFactory("VoterRegistry");
-  const vr = await VR.deploy();
+  const vr = await VR.deploy("");
   await vr.waitForDeployment();
   console.log("VoterRegistry:", vr.target);
 
@@ -45,6 +45,10 @@ async function main() {
   console.log("Results:", results.target);
 
   console.log("\n✅ Deployment complete!");
+  await vr.setBallotContract(ballot.target);
+  console.log("VoterRegistry: ballotContract set to", ballot.target);
+  await vr.transferOwnership(ballot.target);
+  console.log("VoterRegistry ownership transferred to Ballot");
 }
 
 main().catch((e) => {
