@@ -97,6 +97,7 @@ export default function CreateElection({ onCreated }) {
       setEndTime("");
       setCandidates([{ name: "", description: "" }]);
       setRawWhitelist("");
+      alert(`✅ Election #${electionId} created successfully!`);
       onCreated?.();
     } catch (err) {
       console.error(err);

@@ -9,7 +9,6 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
   const [selectedId, setSelectedId] = useState(null);
   const [candidates, setCandidates] = useState([]);
   const [eligible, setEligible] = useState(false);
-  const [hasVoted, setHasVoted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [tokenBalance, setTokenBalance] = useState(0n);
@@ -63,21 +62,7 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
         console.error(e);
       }
     })();
-  }, [contracts.vr, signer, hasVoted]);
-
-  // 4️⃣ Check if already voted
-  useEffect(() => {
-    if (!ballot || !signer) return;
-    (async () => {
-      try {
-        const me = await signer.getAddress();
-        const balance = await contracts.vr.balanceOf(me, electionId);
-        setHasVoted(balance === 0n);
-      } catch (e) {
-        console.error(e);
-      }
-    })();
-  }, [ballot, signer, electionId]);
+  }, [contracts.vr, signer]);
 
   // 5️⃣ Cast vote handler
   const handleVote = async (candidateId) => {
@@ -86,7 +71,8 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
     try {
       const tx = await ballot.connect(signer).vote(electionId, candidateId);
       await tx.wait();
-      setHasVoted(true);
+      alert("✅ Vote recorded!");
+      setEligible(false);
     } catch (err) {
       console.error(err);
       setError(err.reason || err.message || "Vote failed");
@@ -99,12 +85,10 @@ export default function VotePanel({ electionId, ballot, candidateManager }) {
   if (error) {
     return <p style={{ color: "red" }}>Error: {error}</p>;
   }
-  if (hasVoted) {
-    return <p style={{ color: "green" }}>You’ve already voted.</p>;
-  }
   if (!eligible) {
     return <p style={{ color: "crimson" }}>You are not eligible to vote in this election.</p>;
   }
+
 
   return (
     <div style={{ marginTop: 20, padding: 20, border: "1px solid #ddd" }}>
