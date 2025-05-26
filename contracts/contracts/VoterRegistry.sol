@@ -11,7 +11,7 @@ contract VoterRegistry is ERC1155, Ownable {
 
     address public ballotContract;
 
-    constructor(string memory uri) ERC1155(uri) Ownable(msg.sender) {}
+    constructor() ERC1155("") Ownable(msg.sender) {}
 
     function setBallotContract(address _b) external onlyOwner {
         ballotContract = _b;

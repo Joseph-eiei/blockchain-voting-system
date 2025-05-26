@@ -8,7 +8,7 @@ async function main() {
 
   // 1️⃣ VoterRegistry
   const VR = await hre.ethers.getContractFactory("VoterRegistry");
-  const vr = await VR.deploy("");
+  const vr = await VR.deploy();
   await vr.waitForDeployment();
   console.log("VoterRegistry:", vr.target);
 
