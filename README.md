@@ -83,13 +83,14 @@ A decentralized voting application built on the Ethereum blockchain. This system
     * Navigate to the `frontend/` directory.
     * Create a `.env` file.
     * Add the deployed smart contract addresses to this file. For example:
-        ```env
-        VR_ADDRESS=YOUR_VOTERREGISTRY_CONTRACT_ADDRESS
-        EM_ADDRESS=YOUR_ELECTIONMANAGER_CONTRACT_ADDRESS
-        CM_ADDRESS=YOUR_CANDIDATEMANAGER_CONTRACT_ADDRESS
-        BQ_ADDRESS=YOUR_BALLOT_CONTRACT_ADDRESS
-        RS_ADDRESS=YOUR_RESULTS_CONTRACT_ADDRESS
-        ```
+    ```env
+    VR_ADDRESS=YOUR_VOTERREGISTRY_CONTRACT_ADDRESS
+    EM_ADDRESS=YOUR_ELECTIONMANAGER_CONTRACT_ADDRESS
+    CM_ADDRESS=YOUR_CANDIDATEMANAGER_CONTRACT_ADDRESS
+    BQ_ADDRESS=YOUR_BALLOT_CONTRACT_ADDRESS
+    RS_ADDRESS=YOUR_RESULTS_CONTRACT_ADDRESS
+    ```
+    
 ---
 
 ## 🖥️ Running the Application
