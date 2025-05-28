@@ -38,24 +38,24 @@ describe("ElectionManager Contract", function () {
             const description = "Vote for the next president";
             
             await expect(
-                electionManager.connect(owner).createElection( // [cite: 35]
+                electionManager.connect(owner).createElection(
                     name,
                     description,
                     startTime,
                     endTime,
                     whitelistedAccounts
                 )
-            ).to.emit(electionManager, "ElectionCreated") // [cite: 32, 38]
+            ).to.emit(electionManager, "ElectionCreated")
              .withArgs(1, name, description, startTime, endTime, whitelistedAccounts);
             
-            const election = await electionManager.elections(1); // [cite: 31]
-            expect(election.name).to.equal(name); // [cite: 30]
-            expect(election.description).to.equal(description); // [cite: 30]
+            const election = await electionManager.elections(1);
+            expect(election.name).to.equal(name); 
+            expect(election.description).to.equal(description);
             expect(election.startTime).to.equal(startTime);
             expect(election.endTime).to.equal(endTime);
 
-            expect(await electionManager.electionCount()).to.equal(1); // [cite: 36, 42]
-            expect(await electionManager.getWhitelist(1)).to.deep.equal(whitelistedAccounts); // [cite: 37, 40]
+            expect(await electionManager.electionCount()).to.equal(1);
+            expect(await electionManager.getWhitelist(1)).to.deep.equal(whitelistedAccounts); 
         });
 
         it("Should revert if end time is not after start time", async function () {
@@ -64,7 +64,7 @@ describe("ElectionManager Contract", function () {
                 electionManager.connect(owner).createElection(
                     "Fail Election", "Desc", startTime, invalidEndTime, whitelistedAccounts
                 )
-            ).to.be.revertedWith("End must be after start"); // [cite: 34]
+            ).to.be.revertedWith("End must be after start"); 
         });
 
         it("Should revert if end time is not in the future", async function () {
@@ -75,7 +75,7 @@ describe("ElectionManager Contract", function () {
                 electionManager.connect(owner).createElection(
                     "Fail Election", "Desc", validStartTime, pastEndTime, whitelistedAccounts
                 )
-            ).to.be.revertedWith("End must be in future"); // [cite: 34]
+            ).to.be.revertedWith("End must be in future"); 
         });
 
         it("Should prevent non-owner from creating an election", async function () {
@@ -88,12 +88,12 @@ describe("ElectionManager Contract", function () {
 
         it("Should correctly increment election IDs", async function () {
              await electionManager.connect(owner).createElection("Elec 1", "D1", startTime, endTime, []);
-             const tx = await electionManager.connect(owner).createElection("Elec 2", "D2", startTime, endTime + 10, []); // [cite: 36]
+             const tx = await electionManager.connect(owner).createElection("Elec 2", "D2", startTime, endTime + 10, []); 
              const receipt = await tx.wait();
              const event = receipt.logs.find(e => e.eventName === 'ElectionCreated');
              const electionId = event.args[0];
              expect(electionId).to.equal(2);
-             expect(await electionManager.electionCount()).to.equal(2); // [cite: 42]
+             expect(await electionManager.electionCount()).to.equal(2);
         });
     });
 
@@ -109,13 +109,12 @@ describe("ElectionManager Contract", function () {
         });
 
         it("Should allow owner to register a candidate in an existing election", async function () {
-            const candidateIdToRegister = 1; // This is a JS number
+            const candidateIdToRegister = 1; 
             await expect(electionManager.connect(owner).registerCandidateInElection(electionId, candidateIdToRegister))
                 .to.emit(electionManager, "CandidateRegistered")
                 .withArgs(electionId, candidateIdToRegister);
             
             const candidates = await electionManager.getElectionCandidates(electionId);
-            // *** FIX: Compare BigInt with BigInt ***
             expect(candidates).to.include(ethers.toBigInt(candidateIdToRegister));
         });
 
@@ -137,7 +136,6 @@ describe("ElectionManager Contract", function () {
              await electionManager.connect(owner).registerCandidateInElection(electionId, cand1);
              await electionManager.connect(owner).registerCandidateInElection(electionId, cand2);
              const candidates = await electionManager.getElectionCandidates(electionId);
-             // This was already correct using ethers.toBigInt for deep.equal
              expect(candidates).to.deep.equal([ethers.toBigInt(cand1), ethers.toBigInt(cand2)]);
         });
     });
@@ -145,8 +143,8 @@ describe("ElectionManager Contract", function () {
     describe("Getters", function () {
         let electionId;
         const name = "Getter Election";
-        const cand1 = 1; // JS number
-        const cand2 = 2; // JS number
+        const cand1 = 1; 
+        const cand2 = 2; 
 
         beforeEach(async function () {
             const tx = await electionManager.connect(owner).createElection(name, "Desc", startTime, endTime, whitelistedAccounts);
@@ -164,7 +162,6 @@ describe("ElectionManager Contract", function () {
 
         it("getElectionCandidates should return correct candidate IDs", async function () {
             await electionManager.connect(owner).registerCandidateInElection(electionId, cand2);
-             // Ensure comparison with BigInts if using .include or specific order in .deep.equal
             expect(await electionManager.getElectionCandidates(electionId)).to.deep.equal([ethers.toBigInt(cand1), ethers.toBigInt(cand2)]);
         });
         
