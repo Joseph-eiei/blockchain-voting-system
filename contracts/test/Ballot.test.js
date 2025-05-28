@@ -37,7 +37,6 @@ describe("Ballot Contract", function () {
         // Configure VoterRegistry: set ballot contract address
         await voterRegistry.connect(owner).setBallotContract(await ballot.getAddress());
 
-        // *** FIX: Transfer ownership of VoterRegistry to Ballot contract ***
         await voterRegistry.connect(owner).transferOwnership(await ballot.getAddress());
 
         // Create an election
@@ -63,7 +62,6 @@ describe("Ballot Contract", function () {
     describe("addVoters", function () {
         it("Owner should be able to add voters (register them in VoterRegistry)", async function () {
             const votersToAdd = [voter1.address, voter2.address];
-            // Now this call should succeed as Ballot contract owns VoterRegistry
             await expect(ballot.connect(owner).addVoters(electionId, votersToAdd))
                 .to.emit(ballot, "VotersAdded").withArgs(electionId, votersToAdd);
 
@@ -82,7 +80,6 @@ describe("Ballot Contract", function () {
     describe("vote", function () {
         beforeEach(async function () {
             // Add voters and thus mint tokens
-            // This call will now work due to ownership transfer in the outer beforeEach
             await ballot.connect(owner).addVoters(electionId, [voter1.address, voter2.address]);
             // Fast forward to election active period
             await ethers.provider.send("evm_setNextBlockTimestamp", [startTime + 10]);
@@ -113,7 +110,6 @@ describe("Ballot Contract", function () {
             await electionManager.connect(owner).registerCandidateInElection(newElectionId, candidateId1);
             
             // Add voter for this new election
-            // Note: Ballot contract already owns VoterRegistry
             await ballot.connect(owner).addVoters(newElectionId, [voter1.address]);
 
             await expect(
