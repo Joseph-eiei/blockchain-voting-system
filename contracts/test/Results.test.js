@@ -37,7 +37,6 @@ describe("Results Contract", function () {
         // Configure VoterRegistry
         await voterRegistry.connect(owner).setBallotContract(ballotAddress);
 
-        // *** FIX: Transfer ownership of VoterRegistry to Ballot contract ***
         await voterRegistry.connect(owner).transferOwnership(ballotAddress);
 
         // Create an election and register candidates
@@ -52,7 +51,6 @@ describe("Results Contract", function () {
         await electionManager.connect(owner).registerCandidateInElection(electionId, candidateId3);
 
         // Add voters (mint tokens) via Ballot contract
-        // This call will now work due to ownership transfer
         await ballot.connect(owner).addVoters(electionId, [voter1.address, voter2.address]);
 
         // Cast some votes
