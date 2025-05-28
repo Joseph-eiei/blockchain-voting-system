@@ -7,7 +7,7 @@ describe("CandidateManager Contract", function () {
     beforeEach(async function () {
         [owner, addr1] = await ethers.getSigners();
         CandidateManager = await ethers.getContractFactory("CandidateManager");
-        candidateManager = await CandidateManager.deploy(); // [cite: 24]
+        candidateManager = await CandidateManager.deploy(); 
     });
 
     describe("Deployment", function () {
@@ -22,11 +22,11 @@ describe("CandidateManager Contract", function () {
             const description = "Description A";
             
             await expect(candidateManager.connect(owner).addCandidate(name, description))
-                .to.emit(candidateManager, "CandidateAdded") // [cite: 26]
+                .to.emit(candidateManager, "CandidateAdded") 
                 .withArgs(1, name, description);
 
-            const candidate = await candidateManager.candidates(1); // [cite: 23]
-            expect(candidate.id).to.equal(1); // [cite: 25]
+            const candidate = await candidateManager.candidates(1); 
+            expect(candidate.id).to.equal(1);
             expect(candidate.name).to.equal(name);
             expect(candidate.description).to.equal(description);
             expect(candidate.exists).to.be.true;
@@ -38,7 +38,7 @@ describe("CandidateManager Contract", function () {
             const receipt = await tx.wait();
             const event = receipt.logs.find(e => e.eventName === 'CandidateAdded');
             const candidateId = event.args[0];
-            expect(candidateId).to.equal(2); // [cite: 25]
+            expect(candidateId).to.equal(2); 
 
             const candidate = await candidateManager.candidates(2);
             expect(candidate.name).to.equal("Candidate B");
@@ -57,14 +57,14 @@ describe("CandidateManager Contract", function () {
         });
 
         it("Should return a candidate if exists", async function () {
-            const candidate = await candidateManager.getCandidate(1); // [cite: 27]
+            const candidate = await candidateManager.getCandidate(1); 
             expect(candidate.id).to.equal(1);
             expect(candidate.name).to.equal("Candidate 1");
             expect(candidate.exists).to.be.true;
         });
 
         it("Should revert if trying to get a non-existent candidate", async function () {
-            await expect(candidateManager.getCandidate(99)).to.be.revertedWith( // [cite: 27]
+            await expect(candidateManager.getCandidate(99)).to.be.revertedWith( 
                 "Candidate does not exist"
             );
         });
@@ -76,11 +76,11 @@ describe("CandidateManager Contract", function () {
         });
 
         it("Should return true if candidate exists", async function () {
-            expect(await candidateManager.candidateExists(1)).to.be.true; // [cite: 28]
+            expect(await candidateManager.candidateExists(1)).to.be.true; 
         });
 
         it("Should return false if candidate does not exist", async function () {
-            expect(await candidateManager.candidateExists(99)).to.be.false; // [cite: 28]
+            expect(await candidateManager.candidateExists(99)).to.be.false; 
         });
     });
 });
