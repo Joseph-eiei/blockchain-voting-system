@@ -40,7 +40,7 @@ A decentralized voting application built on the Ethereum blockchain. This system
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/Joseph-eiei/blockchain-voting-system.git](https://github.com/Joseph-eiei/blockchain-voting-system.git)
+    git clone https://github.com/Joseph-eiei/blockchain-voting-system.git
     cd blockchain-voting-system
     ```
 
